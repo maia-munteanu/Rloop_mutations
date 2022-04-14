@@ -81,7 +81,7 @@ process get_vcfs {
        file Unclustered_bed
     
        output:
-       set val(sample), file(snv), file("*filt.vcf*") into vcfs
+       set val(sample), file(snv), file("*snv.vcf*") into vcfs
 
        shell:
        '''
