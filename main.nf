@@ -86,7 +86,7 @@ process get_vcfs {
        shell:
        '''
        tabix -p vcf !{snv}
-       bcftools view -f 'PASS' --types snps --regions-file !{Surrounding_bed} !{snv} -Oz > !{sample}.filt.vcf.gz
+       bcftools view -f 'PASS' !{snv} -Oz > !{sample}.filt.vcf.gz
        '''
 }
              
