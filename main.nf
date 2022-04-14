@@ -57,7 +57,7 @@ params.Rloops_bed = "/g/strcombio/fsupek_cancer1/Rloop_clusters_project/Rloops.h
 params.Surrounding_bed = "/g/strcombio/fsupek_cancer1/Rloop_clusters_project/Surrounding.hg19.bed"
 params.Unclustered_bed = "/g/strcombio/fsupek_cancer1/Rloop_clusters_project/Unclustered.hg19.bed"
 params.output_folder = "/g/strcombio/fsupek_cancer1/Rloop_clusters_project/SNV_clusters_VCFs/"
-params.fasta_ref = "/g/strcombio/fsupek_cancer1/Rloop_clusters_project/hg19.fasta"
+params.fasta_ref = "/g/strcombio/fsupek_cancer1/Rloop_clusters_project/hg19.fa"
 
 fasta_ref=file(params.fasta_ref)
 Unclustered_bed=file(params.Unclustered_bed)
