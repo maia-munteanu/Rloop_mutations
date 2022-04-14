@@ -88,7 +88,7 @@ process get_vcfs {
        '''
        bcftools view -f 'PASS' !{snv} -Oz > !{sample}.filt.vcf.gz
        tabix -p vcf !{sample}.filt.vcf.gz
-       bcftools view --regions-file Unclustered.hg19.bed !{sample}.filt.vcf.gz > !{sample}_unclustered.snv.vcf.gz
+       bcftools view --regions-file !{Unclustered_bed} !{sample}.filt.vcf.gz > !{sample}_unclustered.snv.vcf.gz
 
        
        '''
