@@ -44,6 +44,7 @@ if (params.help) {
     log.info '    --Rloops_bed                   FILE           Bed containing the coordinates of Rloops (strand agnostic).'
     log.info '    --Surrounding_bed              FILE           Bed containing the coordinates of regions surrounding Rloops (strand agnostic and up/downstream agnostic.'
     log.info '    --Unclustered_bed              FILE           Bed containing the cooridnates of all other genomic regions not covered by the Rloops and Surrounding beds.'
+    log.info '    --fasta_ref                    FILE           Fasta reference file.'
     log.info ''
     log.info 'Flags:'
     log.info '    --help                                        Display this message'
@@ -56,51 +57,35 @@ params.Rloops_bed = "/g/strcombio/fsupek_cancer1/Rloop_clusters_project/Rloops.h
 params.Surrounding_bed = "/g/strcombio/fsupek_cancer1/Rloop_clusters_project/Surrounding.hg19.bed"
 params.Unclustered_bed = "/g/strcombio/fsupek_cancer1/Rloop_clusters_project/Unclustered.hg19.bed"
 params.output_folder = "/g/strcombio/fsupek_cancer1/Rloop_clusters_project/SNV_clusters_VCFs/"
+params.fasta_ref = "/g/strcombio/fsupek_cancer1/Rloop_clusters_project/hg19.fasta"
 
 pairs_list = Channel.fromPath(params.input_file, checkIfExists: true).splitCsv(header: true, sep: '\t', strip: true)
                    .map{ row -> [ row.sample, file(row.snv) ] }.view()
-                   
+ 
+
 process get_vcfs {
 
-      publishDir params.output_folder, mode: 'copy', pattern: '*.vcf.gz'
-      tag {sample}
-
-       input:
-       set val(sample), file(snv) from pairs_list
-
-
-
-
-}
-                   
-process make_sv_beds {
-
-       publishDir params.output_folder+"/SV_BEDs/", mode: 'copy', pattern: '*.bed'
-
+       publishDir params.output_folder, mode: 'move', pattern: '*.vcf.gz'
        tag {sample}
 
        input:
-       set val(sample), file(sv), file(snv) from pairs_list
-       file hg19
-
+       set val(sample), file(snv) from pairs_list
+       file(Rloops_bed)
+       file(Surrounding_bed)
+       file(Unclustered_bed)
+    
+    
        output:
-       set val(sample), file(sv), file(snv), file("*unclustered.bed"), file("*close.bed"), file("*closer.bed"), file("*cluster.bed") into beds
-       
+       set val(sample), file(snv), file("*snv*") into vcfs
 
        shell:
        '''
-       close_bp=!{params.close_value}
-       bp_per_kb=1000
-       close=$((close_bp / bp_per_kb))
-       echo $close
-    
-       bcftools view -f 'PASS' !{sv} -Oz > !{sample}.sv.filt.vcf.gz
-       
-       Rscript !{baseDir}/vcf_to_bed.R --VCF !{sample}.sv.filt.vcf.gz --close !{params.close_value} --closer !{params.closer_value}
-       bedtools complement -i !{sample}_0_${close}kb_cluster.bed -g !{hg19} > !{sample}_unclustered.bed
-       '''
-  }
+       bcftools view -f PASS --types snps --regions-file unclustered.bed !{sample}.filt.vcf.gz | bcftools norm -d all -f !{fasta_ref} | bcftools sort -Oz > !{sample}_unclustered_highc.snv.vcf.gz
 
+       
+       '''
+}
+                   
 
 process make_vcfs {
     
