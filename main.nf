@@ -70,7 +70,7 @@ pairs_list = Channel.fromPath(params.input_file, checkIfExists: true).splitCsv(h
 
 process get_vcfs {
 
-       publishDir params.output_folder, mode: 'move', pattern: '*filt.vcf*'
+       publishDir params.output_folder, mode: 'move', pattern: '*snv.vcf*'
        tag {sample}
 
        input:
@@ -85,8 +85,12 @@ process get_vcfs {
 
        shell:
        '''
-       tabix -p vcf !{snv}
+       
        bcftools view -f 'PASS' !{snv} -Oz > !{sample}.filt.vcf.gz
+       tabix -p vcf !{sample}.filt.vcf.gz
+       
+       bcftools view --types snps --regions-file !{Rloops_bed} !{sample}.filt.vcf.gz | bcftools norm -d all -f !{fasta_ref} | bcftools sort -Oz > !{sample}_Rloops.snv.vcf.gz
+       gunzip *.snv.vcf.gz
        '''
 }
              
