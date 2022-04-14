@@ -79,18 +79,12 @@ process get_vcfs {
        file Rloops_bed
        file Surrounding_bed
        file Unclustered_bed
-    
-    
-       output:
-       set val(sample), file(snv), file("*snv*") into vcfs
 
        shell:
        '''
        tail -n 10 !{Rloops_bed}
        tail -n 10 !{Surrounding_bed}
        tail -n 10 !{Unclustered_bed}
-       
-
        
        '''
 }
