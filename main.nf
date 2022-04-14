@@ -59,20 +59,26 @@ params.Unclustered_bed = "/g/strcombio/fsupek_cancer1/Rloop_clusters_project/Unc
 params.output_folder = "/g/strcombio/fsupek_cancer1/Rloop_clusters_project/SNV_clusters_VCFs/"
 params.fasta_ref = "/g/strcombio/fsupek_cancer1/Rloop_clusters_project/hg19.fasta"
 
+fasta_ref=file(params.fasta_ref)
+Unclustered_bed=file(params.Unclustered_bed)
+Surrounding_bed=file(params.Surrounding_bed)
+Rloops_bed=file(params.Rloops_bed)
+
 pairs_list = Channel.fromPath(params.input_file, checkIfExists: true).splitCsv(header: true, sep: '\t', strip: true)
                    .map{ row -> [ row.sample, file(row.snv) ] }.view()
  
 
 process get_vcfs {
 
-       publishDir params.output_folder, mode: 'move', pattern: '*.vcf.gz'
+       publishDir params.output_folder, mode: 'move', pattern: '*.snv.vcf*'
        tag {sample}
 
        input:
        set val(sample), file(snv) from pairs_list
-       file(Rloops_bed)
-       file(Surrounding_bed)
-       file(Unclustered_bed)
+       file fasta_ref
+       file Rloops_bed
+       file Surrounding_bed
+       file Unclustered_bed
     
     
        output:
@@ -80,9 +86,13 @@ process get_vcfs {
 
        shell:
        '''
-       bcftools view -f PASS --types snps --regions-file unclustered.bed !{sample}.filt.vcf.gz | bcftools norm -d all -f !{fasta_ref} | bcftools sort -Oz > !{sample}_unclustered_highc.snv.vcf.gz
-
        
+       bcftools view -f 'PASS' !{snv} -Oz > !{sample}.filt.vcf.gz
+       tabix -p vcf !{sample}.filt.vcf.gz
+       bcftools view --types snps --regions-file !{Unclustered_bed} !{sample}.filt.vcf.gz | bcftools norm -d all -f !{fasta_ref} | bcftools sort -Oz > !{sample}_unclustered.snv.vcf.gz
+       bcftools view --types snps --regions-file !{Surrounding_bed} !{sample}.filt.vcf.gz | bcftools norm -d all -f !{fasta_ref} | bcftools sort -Oz > !{sample}_surrounding.snv.vcf.gz
+       bcftools view --types snps --regions-file !{Rloops_bed} !{sample}.filt.vcf.gz | bcftools norm -d all -f !{fasta_ref} | bcftools sort -Oz > !{sample}_rloops.snv.vcf.gz
+       gunzip *.snv.vcf.gz
        '''
 }
                    
