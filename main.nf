@@ -85,9 +85,7 @@ process get_vcfs {
 
        shell:
        '''
-       tail -n 10 !{Rloops_bed}
-       tail -n 10 !{Surrounding_bed}
-       tail -n 10 !{Unclustered_bed}
+       tabix -p vcf !{snv}
        bcftools view -f 'PASS' --types snps --regions-file !{Surrounding_bed} !{snv} -Oz > !{sample}.filt.vcf.gz
        '''
 }
