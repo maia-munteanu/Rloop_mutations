@@ -70,7 +70,7 @@ pairs_list = Channel.fromPath(params.input_file, checkIfExists: true).splitCsv(h
 
 process get_vcfs {
 
-       publishDir params.output_folder, mode: 'move', pattern: '*.snv.vcf*'
+       publishDir params.output_folder, mode: 'move', pattern: '*filt.vcf*'
        tag {sample}
 
        input:
@@ -79,13 +79,16 @@ process get_vcfs {
        file Rloops_bed
        file Surrounding_bed
        file Unclustered_bed
+    
+       output:
+       set val(sample), file(snv), file("*filt.vcf*") into vcfs
 
        shell:
        '''
        tail -n 10 !{Rloops_bed}
        tail -n 10 !{Surrounding_bed}
        tail -n 10 !{Unclustered_bed}
-       
+       bcftools view -f 'PASS' !{snv} -Oz > !{sample}.filt.vcf.gz
        '''
 }
              
