@@ -89,6 +89,9 @@ process get_vcfs {
        tabix -p vcf !{sample}.filt.vcf.gz
        
        bcftools view --types snps --regions-file !{Rloops_bed} !{sample}.filt.vcf.gz | bcftools norm -d all -f !{fasta_ref} | bcftools sort -Oz > !{sample}_Rloops.snv.vcf.gz
+       bcftools view --types snps --regions-file !{Surrounding_bed} !{sample}.filt.vcf.gz | bcftools norm -d all -f !{fasta_ref} | bcftools sort -Oz > !{sample}_Surrounding.snv.vcf.gz
+       bcftools view --types snps --regions-file !{Unclustered_bed} !{sample}.filt.vcf.gz | bcftools norm -d all -f !{fasta_ref} | bcftools sort -Oz > !{sample}_Unclustered.snv.vcf.gz
+
        gunzip *.snv.vcf.gz       
        '''
 }
