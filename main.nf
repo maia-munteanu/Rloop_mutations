@@ -85,11 +85,11 @@ process get_vcfs {
 
        shell:
        '''
-       
        bcftools view -f 'PASS' !{snv} -Oz > !{sample}.filt.vcf.gz
        tabix -p vcf !{sample}.filt.vcf.gz
        
-       bcftools view --types snps --regions-file !{Rloops_bed} !{sample}.filt.vcf.gz | bcftools norm -d all -f !{fasta_ref} > !{sample}_Rloops.snv.vcf.gz
+       bcftools view --types snps --regions-file !{Rloops_bed} !{sample}.filt.vcf.gz | bcftools norm -d all -f !{fasta_ref} | bcftools sort -Oz > !{sample}_Rloops.snv.vcf.gz
+       gunzip *.snv.vcf.gz       
        '''
 }
              
